@@ -8,7 +8,6 @@ namespace Poe_Part_2.Controllers
 {
     public class UserController : Controller
     {
-        // GET: UserController
         public PoeDbContext context = new PoeDbContext();
         public ActionResult Index()
         {
@@ -33,7 +32,6 @@ namespace Poe_Part_2.Controllers
         }
 
 
-        // GET: UserController/Details/5
         public ActionResult Details(string id)
         {
             string loggedIn = HttpContext.Session.GetString("SessionUser");
@@ -79,7 +77,6 @@ namespace Poe_Part_2.Controllers
             }
         }
 
-        // GET: UserController/Create
         public ActionResult Create()
         {
 
@@ -112,7 +109,6 @@ namespace Poe_Part_2.Controllers
             }
         }
 
-        // POST: UserController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(User user)
@@ -132,7 +128,6 @@ namespace Poe_Part_2.Controllers
             }
         }
 
-        // GET: UserController/Edit/5
         public ActionResult Edit(string id)
         {
             string loggedIn = HttpContext.Session.GetString("SessionUser");
@@ -155,7 +150,6 @@ namespace Poe_Part_2.Controllers
             }
         }
 
-        // POST: UserController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(User user)
@@ -172,7 +166,6 @@ namespace Poe_Part_2.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: UserController/Delete/5
         public ActionResult Delete(string id)
         {
             string loggedIn = HttpContext.Session.GetString("SessionUser");
@@ -194,11 +187,17 @@ namespace Poe_Part_2.Controllers
                 return RedirectToAction("SignIn", "Home");
             }
         }
-        // POST: UserController/Delete/5
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(User user, string id)
         {
+            var products = context.Products.Where(x => x.Username == user.Username).ToList();
+            foreach (var product in products)
+            {
+                context.Products.Remove(product);
+                context.SaveChanges();
+            }
             context.Users.Remove(user);
             context.SaveChanges();
             return RedirectToAction("Index");
