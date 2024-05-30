@@ -17,7 +17,7 @@ public partial class PoeDbContext : DbContext
     }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer("Data Source=garthdppoe.database.windows.net;Initial Catalog=poeDB;User ID=garthdp;Password=Siteharm37;Connect Timeout=30;Encrypt=True;Trust Server Certificate=True;Application Intent=ReadWrite;Multi Subnet Failover=False");
+        optionsBuilder.UseSqlServer("Server=tcp:garthdppoe.database.windows.net,1433;Initial Catalog=poeDB;Persist Security Info=False;User ID=garthdp;Password=Siteharm37;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
     }
 
     public virtual DbSet<Category> Categories { get; set; }

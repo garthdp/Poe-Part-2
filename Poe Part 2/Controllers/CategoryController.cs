@@ -13,8 +13,24 @@ namespace Poe_Part_2.Controllers
         public PoeDbContext context = new PoeDbContext();
         public ActionResult Index()
         {
-            var categories = context.Categories.ToList();
-            return View(categories);
+            string loggedIn = HttpContext.Session.GetString("SessionUser");
+            if (CheckSignedIn(loggedIn))
+            {
+                string userType = CheckUserType(loggedIn);
+                if (userType == "Employee")
+                {
+                    var categories = context.Categories.ToList();
+                    return View(categories);
+                }
+                else
+                {
+                    return RedirectToAction("Error", "Home");
+                }
+            }
+            else
+            {
+                return RedirectToAction("SignIn", "Home");
+            }
         }
 
         // GET: CategoryController/Details/5
@@ -26,7 +42,23 @@ namespace Poe_Part_2.Controllers
         // GET: CategoryController/Create
         public ActionResult Create()
         {
-            return View();
+            string loggedIn = HttpContext.Session.GetString("SessionUser");
+            if (CheckSignedIn(loggedIn))
+            {
+                string userType = CheckUserType(loggedIn);
+                if (userType == "Employee")
+                {
+                    return View();
+                }
+                else
+                {
+                    return RedirectToAction("Error", "Home");
+                }
+            }
+            else
+            {
+                return RedirectToAction("SignIn", "Home");
+            }
         }
 
         // POST: CategoryController/Create
@@ -39,32 +71,30 @@ namespace Poe_Part_2.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: CategoryController/Edit/5
-        public ActionResult Edit(int id)
+        private string CheckUserType(string username)
         {
-            var category = context.Categories.Find(id);
-            return View(category);
-        }
+            var user = context.Users.Where(x => x.Username == username).First();
 
-        // POST: CategoryController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(Category category)
-        {
-            var categoryEdit = context.Categories.Find(category.CategoryId);
-            categoryEdit.CategoryName = category.CategoryName;
-            context.Entry(categoryEdit).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            context.SaveChanges();
-            return RedirectToAction("Index");
+            if (user.AccountType == "Employee")
+            {
+                var users = context.Users.ToList();
+                return "Employee";
+            }
+            else
+            {
+                return "Farmer";
+            }
         }
-
-        // GET: CategoryController/Delete/5
-        public ActionResult Delete(int id)
+        private bool CheckSignedIn(string username)
         {
-            Category temp = context.Categories.Find(id);
-            context.Categories.Remove(temp);
-            context.SaveChanges();
-            return RedirectToAction("Index");
+            if (username == null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }

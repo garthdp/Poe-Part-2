@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Poe_Part_2.Data;
+using System;
 using System.Collections.Generic;
 
 namespace Poe_Part_2.Models;
 
 public partial class Product
 {
+    PoeDbContext context = new PoeDbContext();
     public string Username { get; set; } = null!;
 
     public int ProductId { get; set; }

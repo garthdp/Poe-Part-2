@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Poe_Part_2.Data;
+using Microsoft.AspNetCore.Identity;
 
 namespace Poe_Part_2
 {
@@ -11,6 +12,10 @@ namespace Poe_Part_2
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddSession(x=>
+            {
+                x.IdleTimeout = TimeSpan.FromSeconds(1800);
+            });
 
             var app = builder.Build();
 
@@ -28,6 +33,7 @@ namespace Poe_Part_2
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseSession();
 
             app.MapControllerRoute(
                 name: "default",
