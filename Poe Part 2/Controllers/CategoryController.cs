@@ -9,7 +9,6 @@ namespace Poe_Part_2.Controllers
 {
     public class CategoryController : Controller
     {
-        // GET: CategoryController
         public PoeDbContext context = new PoeDbContext();
         public ActionResult Index()
         {
@@ -33,13 +32,6 @@ namespace Poe_Part_2.Controllers
             }
         }
 
-        // GET: CategoryController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: CategoryController/Create
         public ActionResult Create()
         {
             string loggedIn = HttpContext.Session.GetString("SessionUser");
@@ -61,7 +53,6 @@ namespace Poe_Part_2.Controllers
             }
         }
 
-        // POST: CategoryController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(Category category)
@@ -87,7 +78,7 @@ namespace Poe_Part_2.Controllers
         }
         private bool CheckSignedIn(string username)
         {
-            if (username == null)
+            if (username == null || username == "")
             {
                 return false;
             }

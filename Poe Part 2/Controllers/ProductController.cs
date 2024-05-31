@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.IdentityModel.Tokens;
 using Poe_Part_2.Data;
 using Poe_Part_2.Models;
 using System.Collections.Immutable;
@@ -11,31 +12,145 @@ namespace Poe_Part_2.Controllers
     {
         // GET: ProductController
         PoeDbContext context = new PoeDbContext();
-        public ActionResult Index()
+        public ActionResult Index(DateOnly searchDate1, DateOnly searchDate2, int searchCategories)
         {
             string loggedIn = HttpContext.Session.GetString("SessionUser");
             if (CheckSignedIn(loggedIn))
             {
+                var categories = (from u in context.Categories
+                                  select new SelectListItem()
+                                  {
+                                      Text = u.CategoryName,
+                                      Value = u.CategoryId.ToString()
+                                  }).ToList();
+                categories.Insert(0, new SelectListItem() { Text = "----Select----", Value = "" });
+                ViewBag.CategoryId = categories;
                 string userType = CheckUserType(loggedIn);
                 if (userType == "Employee")
                 {
-                    var products = context.Products.ToList();
-                    var categoryNames = (from p in products
+                    if ((searchDate1 == DateOnly.Parse("0001/01/01") || searchDate2 == DateOnly.Parse("0001/01/01")) && searchCategories == 0)
+                    {
+                        var products = context.Products.ToList();
+                        var categoryNames = (from p in products
+                                             from c in context.Categories.ToList()
+                                             where c.CategoryId == p.CategoryId
+                                             select c.CategoryName).ToList();
+                        ViewBag.CategoryNames = categoryNames;
+                        return View(products);
+                    }
+                    else if (searchDate1 <= searchDate2 && searchCategories == 0)
+                    {
+                        var products = context.Products.ToList();
+                        var filterProducts = (from p in products
+                                        where p.ProductionDate >= searchDate1 && p.ProductionDate <= searchDate2
+                                        select p);
+                        var categoryNames = (from p in filterProducts
+                                             from c in context.Categories.ToList()
+                                             where c.CategoryId == p.CategoryId
+                                             select c.CategoryName).ToList();
+                        ViewBag.CategoryNames = categoryNames;
+                        return View(filterProducts);
+                    }
+                    else if ((searchDate1 == DateOnly.Parse("0001/01/01") || searchDate2 == DateOnly.Parse("0001/01/01")) && searchCategories != 0)
+                    {
+                        var products = context.Products.ToList();
+                        var filterProducts = (from p in products
+                                              where p.CategoryId == searchCategories
+                                              select p);
+                        var categoryNames = (from p in filterProducts
+                                             from c in context.Categories.ToList()
+                                             where c.CategoryId == searchCategories
+                                             select c.CategoryName).ToList();
+                        ViewBag.CategoryNames = categoryNames;
+                        return View(filterProducts);
+                    }
+                    else if (searchDate1 <= searchDate2 && searchCategories != 0)
+                    {
+                        var products = context.Products.ToList();
+                        var filterProducts = (from p in products
+                                              where p.CategoryId == searchCategories
+                                              && p.ProductionDate >= searchDate1 && p.ProductionDate <= searchDate2
+                                              select p);
+                        var categoryNames = (from p in filterProducts
                                          from c in context.Categories.ToList()
-                                         where c.CategoryId == p.CategoryId
+                                         where c.CategoryId == searchCategories
                                          select c.CategoryName).ToList();
-                    ViewBag.CategoryNames = categoryNames;
-                    return View(products);
+                        ViewBag.CategoryNames = categoryNames;
+                        return View(filterProducts);
+                    }
+                    else
+                    {
+                        var products = context.Products.ToList();
+                        var categoryNames = (from p in products
+                                             from c in context.Categories.ToList()
+                                             where c.CategoryId == p.CategoryId
+                                             select c.CategoryName).ToList();
+                        ViewBag.CategoryNames = categoryNames;
+                        return View(products);
+                    }
                 }
                 else
                 {
-                    var products = context.Products.Where(x => x.Username == loggedIn).ToList();
-                    var categoryNames = (from p in products
-                                         from c in context.Categories.ToList()
-                                         where c.CategoryId == p.CategoryId && p.Username == loggedIn
-                                         select c.CategoryName).ToList();
-                    ViewBag.CategoryNames = categoryNames;
-                    return View(products);
+                    if ((searchDate1 == DateOnly.Parse("0001/01/01") || searchDate2 == DateOnly.Parse("0001/01/01")) && searchCategories == 0)
+                    {
+                        var userProducts = context.Products.Where(x => x.Username == loggedIn).ToList();
+                        var userCategoryNames = (from p in userProducts
+                                             from c in context.Categories.ToList()
+                                             where c.CategoryId == p.CategoryId
+                                             select c.CategoryName).ToList();
+                        ViewBag.CategoryNames = userCategoryNames;
+                        return View(userProducts);
+                    }
+                    else if (searchDate1 <= searchDate2 && searchCategories == 0)
+                    {
+                        var filterProducts = (from p in context.Products
+                                              where p.ProductionDate >= searchDate1 && p.ProductionDate <= searchDate2
+                                              && p.Username == loggedIn
+                                              select p).ToList();
+                        var userCategoryNames = (from p in filterProducts
+                                             from c in context.Categories.ToList()
+                                             where c.CategoryId == p.CategoryId
+                                             select c.CategoryName).ToList();
+                        ViewBag.CategoryNames = userCategoryNames;
+                        return View(filterProducts);
+                    }
+                    else if ((searchDate1 == DateOnly.Parse("0001/01/01") || searchDate2 == DateOnly.Parse("0001/01/01")) && searchCategories != 0)
+                    {
+                        var filterProducts = (from p in context.Products
+                                              where p.CategoryId == searchCategories
+                                              && p.Username == loggedIn
+                                              select p).ToList();
+                        var userCategoryNames = (from p in filterProducts
+                                             from c in context.Categories.ToList()
+                                             where c.CategoryId == searchCategories
+                                                 select c.CategoryName).ToList();
+                        ViewBag.CategoryNames = userCategoryNames;
+                        return View(filterProducts);
+                    }
+                    else if (searchDate1 <= searchDate2 && searchCategories != 0)
+                    {
+                        var filterProducts = (from p in context.Products
+                                              where p.CategoryId == searchCategories
+                                              && p.ProductionDate >= searchDate1 && p.ProductionDate <= searchDate2
+                                              && p.Username == loggedIn
+                                              select p).ToList();
+                        var userCategoryNames = (from p in filterProducts
+                                             from c in context.Categories.ToList()
+                                             where c.CategoryId == searchCategories
+                                             select c.CategoryName).ToList();
+                        ViewBag.CategoryNames = userCategoryNames;
+                        return View(filterProducts);
+                    }
+                    else
+                    {
+                        var userProducts = context.Products.Where(x => x.Username == loggedIn).ToList();
+                        var userCategoryNames = (from p in context.Products
+                                                 from c in context.Categories.ToList()
+                                             where c.CategoryId == p.CategoryId
+                                             select c.CategoryName).ToList();
+                        ViewBag.CategoryNames = userCategoryNames;
+                        return View(userProducts);
+                    }
                 }
             }
             else
@@ -198,7 +313,7 @@ namespace Poe_Part_2.Controllers
         }
         private bool CheckSignedIn(string username)
         {
-            if (username == null)
+            if (username == null || username == "")
             {
                 return false;
             }

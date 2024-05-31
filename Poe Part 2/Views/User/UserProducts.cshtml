@@ -1,0 +1,65 @@
+﻿@model IEnumerable<Poe_Part_2.Models.Product>
+
+@{
+    ViewData["Title"] = "UserProducts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>@ViewBag.User's Products</h1>
+
+<p>
+    <a asp-action="Index">Back to Users</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <partial>Product Name</partial>
+            </th>
+            <th>
+                <partial>Production Date</partial>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Info)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Category)
+            </th>
+            <th>
+                <partial>Username</partial>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductionDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Info)
+                </td>
+                <td>
+                    @foreach (var name in ViewBag.CategoryNames)
+                    {
+                        Poe_Part_2.Data.PoeDbContext context = new Poe_Part_2.Data.PoeDbContext();
+                        var category = context.Categories.Find(item.CategoryId);
+                        <partial id="CategoryName">@category.CategoryName</partial>
+                        break;
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UsernameNavigation.Username)
+                </td>
+                <td>
+                    <a asp-action="UserProductDetails" asp-route-id="@item.ProductId">Details</a>
+                </td>
+            </tr>
+}
+    </tbody>
+</table>

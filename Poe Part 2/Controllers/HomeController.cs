@@ -89,7 +89,7 @@ namespace Poe_Part_2.Controllers
         }
         private bool CheckSignedIn(string username)
         {
-            if (username == null)
+            if (username == null || username == "")
             {
                 return false;
             }
