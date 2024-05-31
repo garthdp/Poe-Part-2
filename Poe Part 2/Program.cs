@@ -12,10 +12,7 @@ namespace Poe_Part_2
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            builder.Services.AddSession(x=>
-            {
-                x.IdleTimeout = TimeSpan.FromSeconds(1800);
-            });
+            builder.Services.AddSession();
 
             var app = builder.Build();
 
@@ -27,13 +24,13 @@ namespace Poe_Part_2
                 app.UseHsts();
             }
 
+            app.UseSession();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
 
             app.UseAuthorization();
-            app.UseSession();
 
             app.MapControllerRoute(
                 name: "default",
