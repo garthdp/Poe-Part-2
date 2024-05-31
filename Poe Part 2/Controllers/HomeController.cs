@@ -14,8 +14,10 @@ namespace Poe_Part_2.Controllers
             _logger = logger;
         }
 
+        // Shows homescreen
         public IActionResult Index()
         {
+            // only allows signed in users to see homescreen
             string loggedIn = HttpContext.Session.GetString("SessionUser");
             if (CheckSignedIn(loggedIn))
             {
@@ -54,7 +56,6 @@ namespace Poe_Part_2.Controllers
                 }
                 else
                 {
-                    // displays error if incorrect details are entered
                     return View();
                 }
             }
@@ -74,6 +75,7 @@ namespace Poe_Part_2.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+        // checks if user name is taken
         private string CheckUserType(string username)
         {
             var user = context.Users.Where(x => x.Username == username).First();
@@ -88,6 +90,7 @@ namespace Poe_Part_2.Controllers
                 return "Farmer";
             }
         }
+        //checks if user is signed in
         private bool CheckSignedIn(string username)
         {
             if (username == null || username == "")

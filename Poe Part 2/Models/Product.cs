@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace Poe_Part_2.Models;
 
+// Product class
 public partial class Product
 {
     PoeDbContext context = new PoeDbContext();

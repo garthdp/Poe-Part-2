@@ -1,6 +1,7 @@
 ﻿using BCryptNet = BCrypt.Net.BCrypt;
 namespace Poe_Part_2.Data
 {
+    //Class which hashes passwords
     public class EncryptionClass
     {
         // hashs passwords

@@ -10,8 +10,10 @@ namespace Poe_Part_2.Controllers
     public class CategoryController : Controller
     {
         public PoeDbContext context = new PoeDbContext();
+        //shows categories
         public ActionResult Index()
         {
+            // only allows employees to see categories
             string loggedIn = HttpContext.Session.GetString("SessionUser");
             if (CheckSignedIn(loggedIn))
             {
@@ -32,8 +34,10 @@ namespace Poe_Part_2.Controllers
             }
         }
 
+        //creates categories
         public ActionResult Create()
         {
+            // only allows employees to make categories
             string loggedIn = HttpContext.Session.GetString("SessionUser");
             if (CheckSignedIn(loggedIn))
             {
@@ -53,6 +57,7 @@ namespace Poe_Part_2.Controllers
             }
         }
 
+        // saves category
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(Category category)
@@ -62,6 +67,7 @@ namespace Poe_Part_2.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // checks if user name is taken
         private string CheckUserType(string username)
         {
             var user = context.Users.Where(x => x.Username == username).First();
@@ -76,6 +82,7 @@ namespace Poe_Part_2.Controllers
                 return "Farmer";
             }
         }
+        //checks if user is signed in
         private bool CheckSignedIn(string username)
         {
             if (username == null || username == "")

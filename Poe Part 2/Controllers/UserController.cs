@@ -11,12 +11,17 @@ namespace Poe_Part_2.Controllers
 {
     public class UserController : Controller
     {
+        // provides access to database
         public PoeDbContext context = new PoeDbContext();
+
+        // shows list of users 
         public ActionResult Index()
         {
+            // If statement which checks if user is signed in, redirects unauthorised users
             string loggedIn = HttpContext.Session.GetString("SessionUser");
             if (CheckSignedIn(loggedIn))
             {
+                // checks user type and only allows employees access, redirects unauthorised users
                 string userType = CheckUserType(loggedIn);
                 if (userType == "Employee")
                 {
@@ -28,29 +33,37 @@ namespace Poe_Part_2.Controllers
                     return RedirectToAction("Error", "Home");
                 }
             }
+
             else
             {
                 return RedirectToAction("SignIn", "Home");
             }
         }
-
+        // shows list of selected users products
         public ActionResult UserProducts(string id, DateOnly searchDate1, DateOnly searchDate2, int searchCategories)
         {
+            // If statement which checks if user is signed in, redirects unauthorised users
             string loggedIn = HttpContext.Session.GetString("SessionUser");
             if (CheckSignedIn(loggedIn))
             {
-                var categories = (from u in context.Categories
-                                  select new SelectListItem()
-                                  {
-                                      Text = u.CategoryName,
-                                      Value = u.CategoryId.ToString()
-                                  }).ToList();
-                categories.Insert(0, new SelectListItem() { Text = "----Select----", Value = "" });
-                ViewBag.CategoryId = categories;
-                ViewBag.User = id;
                 string userType = CheckUserType(loggedIn);
+                // checks user type and only allows employees access, redirects unauthorised users
                 if (userType == "Employee")
                 {
+                    // fills categories selectbox
+                    var categories = (from u in context.Categories
+                                      select new SelectListItem()
+                                      {
+                                          Text = u.CategoryName,
+                                          Value = u.CategoryId.ToString()
+                                      }).ToList();
+                    categories.Insert(0, new SelectListItem() { Text = "----Select----", Value = "" });
+                    ViewBag.CategoryId = categories;
+
+                    ViewBag.User = id;
+
+                    //if statements which filter products for user
+                    //checks if user has changed anything and if they havent shows all products
                     if ((searchDate1 == DateOnly.Parse("0001/01/01") || searchDate2 == DateOnly.Parse("0001/01/01")) && searchCategories == 0)
                     {
                         var products = context.Products.Where(x => x.Username == id).ToList();
@@ -61,6 +74,7 @@ namespace Poe_Part_2.Controllers
                         ViewBag.CategoryNames = categoryNames;
                         return View(products);
                     }
+                    // filters by date
                     else if (searchDate1 <= searchDate2 && searchCategories == 0)
                     {
                         var products = context.Products.ToList();
@@ -75,6 +89,7 @@ namespace Poe_Part_2.Controllers
                         ViewBag.CategoryNames = categoryNames;
                         return View(filterProducts);
                     }
+                    // filters by category
                     else if ((searchDate1 == DateOnly.Parse("0001/01/01") || searchDate2 == DateOnly.Parse("0001/01/01")) && searchCategories != 0)
                     {
                         var products = context.Products.ToList();
@@ -89,6 +104,7 @@ namespace Poe_Part_2.Controllers
                         ViewBag.CategoryNames = categoryNames;
                         return View(filterProducts);
                     }
+                    // filters by date and category
                     else if (searchDate1 <= searchDate2 && searchCategories != 0)
                     {
                         var products = context.Products.ToList();
@@ -104,6 +120,7 @@ namespace Poe_Part_2.Controllers
                         ViewBag.CategoryNames = categoryNames;
                         return View(filterProducts);
                     }
+                    // shows all products
                     else
                     {
                         var products = context.Products.Where(x => x.Username == id).ToList();
@@ -126,8 +143,10 @@ namespace Poe_Part_2.Controllers
             }
         }
 
+        //shows user details
         public ActionResult Details(string id)
         {
+            //checks if user is logged in and if user is employee
             string loggedIn = HttpContext.Session.GetString("SessionUser");
             if (CheckSignedIn(loggedIn))
             {
@@ -147,6 +166,7 @@ namespace Poe_Part_2.Controllers
                 return RedirectToAction("SignIn", "Home");
             }
         }
+        // shows employee the users product details
         public ActionResult UserProductDetails(int id)
         {
             string loggedIn = HttpContext.Session.GetString("SessionUser");
@@ -164,24 +184,15 @@ namespace Poe_Part_2.Controllers
             }
         }
 
+        // shows users their profile
         public ActionResult Profile()
         {
             string loggedIn = HttpContext.Session.GetString("SessionUser");
             if (CheckSignedIn(loggedIn))
             {
-                string userType = CheckUserType(loggedIn);
-                if (userType == "Employee")
-                {
-                    var user = context.Users.Find(loggedIn);
-                    ViewBag.User = user.Username;
-                    return View(user);
-                }
-                else
-                {
-                    var user = context.Users.Find(loggedIn);
-                    ViewBag.User = user.Username;
-                    return View(user);
-                }
+                var user = context.Users.Find(loggedIn);
+                ViewBag.User = user.Username;
+                return View(user);
             }
             else
             {
@@ -189,8 +200,10 @@ namespace Poe_Part_2.Controllers
             }
         }
 
+        // Creates user account
         public ActionResult Create()
         {
+            // only allows employees to create accounts
             string loggedIn = HttpContext.Session.GetString("SessionUser");
             if (CheckSignedIn(loggedIn))
             {
@@ -220,14 +233,17 @@ namespace Poe_Part_2.Controllers
             }
         }
 
+        // saves account to database
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(User user)
         {
             EncryptionClass encryption = new EncryptionClass();
+            //checks if username is take
             var check = context.Users.Where(x => x.Username == user.Username).FirstOrDefault();
             if(check == null)
             {
+                // checks email and phonenumber format
                 if (IsEmail(user.Email) && IsPhonenumber(user.PhoneNumber))
                 {
                     user.Password = encryption.HashPassword(user.Password);
@@ -246,8 +262,10 @@ namespace Poe_Part_2.Controllers
             }
         }
 
+        // Edits user details
         public ActionResult Edit(string id)
         {
+            // only employees can make changes
             string loggedIn = HttpContext.Session.GetString("SessionUser");
             if (CheckSignedIn(loggedIn))
             {
@@ -255,6 +273,8 @@ namespace Poe_Part_2.Controllers
                 if (userType == "Employee")
                 {
                     ViewBag.User = id;
+
+                    // fills selectlist with account types
                     List<SelectListItem> accountTypes = new List<SelectListItem>();
                     SelectListItem accountType1 = new SelectListItem();
                     accountType1.Text = "Employee";
@@ -279,6 +299,7 @@ namespace Poe_Part_2.Controllers
             }
         }
 
+        //saves changes to database
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(User user)
@@ -300,11 +321,13 @@ namespace Poe_Part_2.Controllers
                 return RedirectToAction("Edit", "User");
             }
         }
+        //signs user out
         public ActionResult SignOut()
         {
             HttpContext.Session.SetString("SessionUser", "");
             return RedirectToAction("SignIn", "Home");
         }
+        // checks if user name is taken
         private string CheckUserType(string username)
         {
             var user = context.Users.Where(x => x.Username == username).First();
@@ -319,6 +342,7 @@ namespace Poe_Part_2.Controllers
                 return "Farmer";
             }
         }
+        //checks if user is signed in
         private bool CheckSignedIn(string username)
         {
             if (username == null || username == "")
@@ -330,6 +354,7 @@ namespace Poe_Part_2.Controllers
                 return true;
             }
         }
+        // checks email format
         private static bool IsEmail(string email)
         {
             bool isEmail = true;
@@ -343,6 +368,7 @@ namespace Poe_Part_2.Controllers
             }
             return isEmail;
         }
+        // checks phonenumber format
         private static bool IsPhonenumber(string phonenumber)
         {
             bool isPhonenumber = true;

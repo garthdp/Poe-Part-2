@@ -10,13 +10,16 @@ namespace Poe_Part_2.Controllers
 {
     public class ProductController : Controller
     {
-        // GET: ProductController
+        // allows access to database
         PoeDbContext context = new PoeDbContext();
+        // shows list of products
         public ActionResult Index(DateOnly searchDate1, DateOnly searchDate2, int searchCategories)
         {
+            // checks if user is signed it
             string loggedIn = HttpContext.Session.GetString("SessionUser");
             if (CheckSignedIn(loggedIn))
             {
+                // fills categories for select list
                 var categories = (from u in context.Categories
                                   select new SelectListItem()
                                   {
@@ -26,8 +29,10 @@ namespace Poe_Part_2.Controllers
                 categories.Insert(0, new SelectListItem() { Text = "----Select----", Value = "" });
                 ViewBag.CategoryId = categories;
                 string userType = CheckUserType(loggedIn);
+                // checks user type, employees have access to all products, where as farmers can only see their own products
                 if (userType == "Employee")
                 {
+                    //checks if user has changed anything and if they havent shows all products
                     if ((searchDate1 == DateOnly.Parse("0001/01/01") || searchDate2 == DateOnly.Parse("0001/01/01")) && searchCategories == 0)
                     {
                         var products = context.Products.ToList();
@@ -38,6 +43,7 @@ namespace Poe_Part_2.Controllers
                         ViewBag.CategoryNames = categoryNames;
                         return View(products);
                     }
+                    // filters by date
                     else if (searchDate1 <= searchDate2 && searchCategories == 0)
                     {
                         var products = context.Products.ToList();
@@ -51,6 +57,7 @@ namespace Poe_Part_2.Controllers
                         ViewBag.CategoryNames = categoryNames;
                         return View(filterProducts);
                     }
+                    // filters by category
                     else if ((searchDate1 == DateOnly.Parse("0001/01/01") || searchDate2 == DateOnly.Parse("0001/01/01")) && searchCategories != 0)
                     {
                         var products = context.Products.ToList();
@@ -64,6 +71,7 @@ namespace Poe_Part_2.Controllers
                         ViewBag.CategoryNames = categoryNames;
                         return View(filterProducts);
                     }
+                    // filters by date and category
                     else if (searchDate1 <= searchDate2 && searchCategories != 0)
                     {
                         var products = context.Products.ToList();
@@ -78,6 +86,7 @@ namespace Poe_Part_2.Controllers
                         ViewBag.CategoryNames = categoryNames;
                         return View(filterProducts);
                     }
+                    // shows all products
                     else
                     {
                         var products = context.Products.ToList();
@@ -89,6 +98,7 @@ namespace Poe_Part_2.Controllers
                         return View(products);
                     }
                 }
+                // Same filter settings as above but will only show user products
                 else
                 {
                     if ((searchDate1 == DateOnly.Parse("0001/01/01") || searchDate2 == DateOnly.Parse("0001/01/01")) && searchCategories == 0)
@@ -159,7 +169,7 @@ namespace Poe_Part_2.Controllers
             }
         }
 
-        // GET: ProductController/Details/5
+        // Show product details
         public ActionResult Details(int id)
         {
             string loggedIn = HttpContext.Session.GetString("SessionUser");
@@ -177,7 +187,7 @@ namespace Poe_Part_2.Controllers
             }
         }
 
-        // GET: ProductController/Create
+        // Allows only farmers to create products
         public ActionResult Create(Product product)
         {
             string loggedIn = HttpContext.Session.GetString("SessionUser");
@@ -206,7 +216,7 @@ namespace Poe_Part_2.Controllers
             }
         }
 
-        // POST: ProductController/Create
+        // Saves products
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(IFormCollection collection, Product product)
@@ -217,7 +227,7 @@ namespace Poe_Part_2.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: ProductController/Edit/5
+        // Allows only users to edit their own products
         public ActionResult Edit(int id)
         {
             string loggedIn = HttpContext.Session.GetString("SessionUser");
@@ -247,7 +257,7 @@ namespace Poe_Part_2.Controllers
             }
         }
 
-        // POST: ProductController/Edit/5
+        // Saves changes to database
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(Product productOld)
@@ -262,7 +272,7 @@ namespace Poe_Part_2.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: ProductController/Delete/5
+        // Allows users to delete products
         public ActionResult Delete(int id)
         {
             string loggedIn = HttpContext.Session.GetString("SessionUser");
@@ -288,7 +298,7 @@ namespace Poe_Part_2.Controllers
             }
         }
 
-        // POST: ProductController/Delete/5
+        // Deletes from database
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Delete(Product product, string id)
@@ -297,6 +307,7 @@ namespace Poe_Part_2.Controllers
             context.SaveChanges();
             return RedirectToAction("Index");
         }
+        // checks if user name is taken
         private string CheckUserType(string username)
         {
             var user = context.Users.Where(x => x.Username == username).First();
@@ -311,6 +322,7 @@ namespace Poe_Part_2.Controllers
                 return "Farmer";
             }
         }
+        //checks if user is signed in
         private bool CheckSignedIn(string username)
         {
             if (username == null || username == "")

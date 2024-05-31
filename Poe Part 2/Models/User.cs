@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Poe_Part_2.Models;
 
+// User class
 public partial class User
 {
     public string Username { get; set; } = null!;

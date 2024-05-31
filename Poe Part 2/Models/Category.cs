@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Poe_Part_2.Models;
 
+// Category class
 public partial class Category
 {
     public int CategoryId { get; set; }

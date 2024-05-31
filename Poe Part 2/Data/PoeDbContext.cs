@@ -5,6 +5,7 @@ using Poe_Part_2.Models;
 
 namespace Poe_Part_2.Data;
 
+// Context class used to interact with database
 public partial class PoeDbContext : DbContext
 {
     public PoeDbContext()
