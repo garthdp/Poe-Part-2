@@ -19,7 +19,7 @@
             <a asp-action="UserProducts">Back to Full List</a>
         </p>
         <p>
-            Between dates:
+            Select product category:
             <select name="searchCategories" asp-items="ViewBag.CategoryId"></select>
             <input type="submit" value="Search" class="btn btn-primary" /> |
             <a asp-action="UserProducts">Back to Full List</a>
@@ -35,9 +35,6 @@
             </th>
             <th>
                 <partial>Production Date</partial>
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Info)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Category)
@@ -57,9 +54,6 @@
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.ProductionDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Info)
                 </td>
                 <td>
                     @foreach (var name in ViewBag.CategoryNames)

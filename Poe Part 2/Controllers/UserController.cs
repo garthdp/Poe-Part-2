@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Poe_Part_2.Data;
 using Poe_Part_2.Models;
+using System.ComponentModel.DataAnnotations;
+using System.Net.Mail;
 
 namespace Poe_Part_2.Controllers
 {
@@ -188,7 +191,6 @@ namespace Poe_Part_2.Controllers
 
         public ActionResult Create()
         {
-
             string loggedIn = HttpContext.Session.GetString("SessionUser");
             if (CheckSignedIn(loggedIn))
             {
@@ -226,14 +228,21 @@ namespace Poe_Part_2.Controllers
             var check = context.Users.Where(x => x.Username == user.Username).FirstOrDefault();
             if(check == null)
             {
-                user.Password = encryption.HashPassword(user.Password);
-                context.Users.Add(user);
-                context.SaveChanges();
-                return RedirectToAction(nameof(Index));
+                if (IsEmail(user.Email) && IsPhonenumber(user.PhoneNumber))
+                {
+                    user.Password = encryption.HashPassword(user.Password);
+                    context.Users.Add(user);
+                    context.SaveChanges();
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    return RedirectToAction("Create", "User");
+                }
             }
             else
             {
-                return View();
+                return RedirectToAction("Create", "User");
             }
         }
 
@@ -245,6 +254,7 @@ namespace Poe_Part_2.Controllers
                 string userType = CheckUserType(loggedIn);
                 if (userType == "Employee")
                 {
+                    ViewBag.User = id;
                     List<SelectListItem> accountTypes = new List<SelectListItem>();
                     SelectListItem accountType1 = new SelectListItem();
                     accountType1.Text = "Employee";
@@ -273,15 +283,22 @@ namespace Poe_Part_2.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(User user)
         {
-            var userEdit = context.Users.Find(user.Username);
-            userEdit.PhoneNumber = user.PhoneNumber;
-            userEdit.Surname = user.Surname;
-            userEdit.Name = user.Name;
-            userEdit.Email = user.Email;
-            userEdit.AccountType = user.AccountType;
-            context.Entry(userEdit).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            context.SaveChanges();
-            return RedirectToAction(nameof(Index));
+            if (IsEmail(user.Email) && IsPhonenumber(user.PhoneNumber))
+            {
+                var userEdit = context.Users.Find(user.Username);
+                userEdit.PhoneNumber = user.PhoneNumber;
+                userEdit.Surname = user.Surname;
+                userEdit.Name = user.Name;
+                userEdit.Email = user.Email;
+                userEdit.AccountType = user.AccountType;
+                context.Entry(userEdit).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                context.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                return RedirectToAction("Edit", "User");
+            }
         }
         public ActionResult SignOut()
         {
@@ -311,6 +328,44 @@ namespace Poe_Part_2.Controllers
             else
             {
                 return true;
+            }
+        }
+        private static bool IsEmail(string email)
+        {
+            bool isEmail = true;
+            try
+            {
+                var checkedEmail = new MailAddress(email);
+            }
+            catch
+            {
+                isEmail = false;
+            }
+            return isEmail;
+        }
+        private static bool IsPhonenumber(string phonenumber)
+        {
+            bool isPhonenumber = true;
+            if (phonenumber.Length == 10)
+            {
+                for (int i = 0; i < phonenumber.Length; i++)
+                {
+                    if ((i == 0 && phonenumber[i] != '0') || !Char.IsDigit(phonenumber[i]))
+                    {
+                        isPhonenumber = false;
+                        break;
+                    }
+                    else
+                    {
+                        isPhonenumber = true;
+                    }
+                }
+                return isPhonenumber;
+            }
+            else
+            {
+                isPhonenumber = false;
+                return isPhonenumber;
             }
         }
     }
