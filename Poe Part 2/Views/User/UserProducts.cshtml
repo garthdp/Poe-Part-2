@@ -10,6 +10,23 @@
 <p>
     <a asp-action="Index">Back to Users</a>
 </p>
+
+<form asp-action="UserProducts" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Between dates: <input type="date" name="searchDate1" /> and <input type="date" name="searchDate2" />
+            <input type="submit" value="Search" class="btn btn-primary" /> |
+            <a asp-action="UserProducts">Back to Full List</a>
+        </p>
+        <p>
+            Between dates:
+            <select name="searchCategories" asp-items="ViewBag.CategoryId"></select>
+            <input type="submit" value="Search" class="btn btn-primary" /> |
+            <a asp-action="UserProducts">Back to Full List</a>
+        </p>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>

@@ -20,6 +20,7 @@ namespace Poe_Part_2.Controllers
             if (CheckSignedIn(loggedIn))
             {
                 string userType = CheckUserType(loggedIn);
+                ViewBag.User = loggedIn;
                 return View();
             }
             else
