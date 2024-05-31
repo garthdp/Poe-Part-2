@@ -24,13 +24,13 @@ namespace Poe_Part_2
                 app.UseHsts();
             }
 
-            app.UseSession();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseSession();
 
             app.MapControllerRoute(
                 name: "default",

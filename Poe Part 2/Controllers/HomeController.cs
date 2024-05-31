@@ -14,6 +14,7 @@ namespace Poe_Part_2.Controllers
             _logger = logger;
         }
 
+
         // Shows homescreen
         public IActionResult Index()
         {
